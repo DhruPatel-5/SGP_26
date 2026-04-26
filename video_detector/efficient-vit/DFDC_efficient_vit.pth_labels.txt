@@ -1,0 +1,2 @@
+../deep_fakes\dataset\test_set\DFDC\fake_video_1 0.08025379 --> 0.08025379(CORRECT: 1.0)
+../deep_fakes\dataset\test_set\DFDC\real_video_1 0.060483016 --> 0.060483016(CORRECT: 0.0)

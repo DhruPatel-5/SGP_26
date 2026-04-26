@@ -1,0 +1,26 @@
+name: deepfakes
+channels:
+  - pytorch
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cpuonly
+  - numpy
+  - pandas
+  - scikit-learn
+  - opencv
+  - pillow
+  - matplotlib
+  - pyyaml
+  - tqdm
+  - pip
+
+  - pip:
+      - albumentations
+      - timm
+      - einops
+      - scipy
