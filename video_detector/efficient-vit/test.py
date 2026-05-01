@@ -246,9 +246,7 @@ if __name__ == "__main__":
         model.eval()
 
         # FIXED DEVICE HANDLING
-        device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        device = torch.device("cpu")
 
         model = model.to(device)
 

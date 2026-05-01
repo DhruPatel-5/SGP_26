@@ -5,3 +5,7 @@ Pillow>=10.0.0
 opencv-python-headless>=4.9.0
 torch>=2.1.0
 torchvision>=0.16.0
+PyYAML>=6.0.0
+einops>=0.7.0
+albumentations>=1.4.0
+efficientnet-pytorch>=0.7.1

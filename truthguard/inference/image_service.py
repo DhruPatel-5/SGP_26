@@ -29,7 +29,7 @@ class ImageDetectorService:
 
         model = efficientnet_b0()
         model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, 2)
-        model.load_state_dict(torch.load(IMAGE_MODEL_PATH, map_location="cpu"))
+        model.load_state_dict(torch.load(IMAGE_MODEL_PATH, map_location=torch.device("cpu")))
         model.eval()
         self.model = model
         self.preprocess = transforms.Compose([
