@@ -4,3 +4,9 @@ __pycache__/
 *.pth
 *.ckpt
 .ipynb_checkpoints/
+truthguard/data/
+*.db
+*.log
+*.mp4
+*.png
+*.jpg
