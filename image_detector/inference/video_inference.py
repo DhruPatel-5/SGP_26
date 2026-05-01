@@ -7,7 +7,7 @@ from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 from PIL import Image
 
 # 🔄 Load model
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 weights = EfficientNet_B0_Weights.IMAGENET1K_V1
 model = efficientnet_b0(weights=weights)
 num_features = model.classifier[1].in_features

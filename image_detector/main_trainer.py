@@ -62,7 +62,7 @@ early_stop = EarlyStopping(
 # === Trainer ===
 trainer = pl.Trainer(
     max_epochs=cfg["num_epochs"],
-    accelerator="gpu" if torch.cuda.is_available() else "cpu",
+    accelerator="cpu",
     callbacks=[checkpoint, early_stop],
     enable_progress_bar=True,
     log_every_n_steps=cfg.get("log_every_n_steps", 1)

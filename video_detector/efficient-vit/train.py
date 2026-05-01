@@ -247,7 +247,8 @@ if __name__ == "__main__":
     del validation_dataset
     
 
-    model = model.cuda()
+    device = torch.device("cpu")
+    model = model.to(device)
     counter = 0
     not_improved_loss = 0
     previous_loss = math.inf
@@ -266,7 +267,7 @@ if __name__ == "__main__":
         for index, (images, labels) in enumerate(dl):
             images = np.transpose(images, (0, 3, 1, 2))
             labels = labels.unsqueeze(1)
-            images = images.cuda()
+            images = images.to(device)
             
             y_pred = model(images)
             y_pred = y_pred.cpu()
@@ -302,7 +303,7 @@ if __name__ == "__main__":
     
             val_images = np.transpose(val_images, (0, 3, 1, 2))
             
-            val_images = val_images.cuda()
+            val_images = val_images.to(device)
             val_labels = val_labels.unsqueeze(1)
             val_pred = model(val_images)
             val_pred = val_pred.cpu()

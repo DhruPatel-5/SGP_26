@@ -104,7 +104,7 @@ class EfficientViT(nn.Module):
         self.selected_efficient_net = selected_efficient_net
 
         if selected_efficient_net == 0:
-            self.efficient_net = EfficientNet.from_pretrained('efficientnet-b0')
+            self.efficient_net = EfficientNet.from_name('efficientnet-b0')
         else:
             self.efficient_net = EfficientNet.from_pretrained('efficientnet-b7')
             checkpoint = torch.load("weights/final_999_DeepFakeClassifier_tf_efficientnet_b7_ns_0_23", map_location="cpu")
@@ -156,7 +156,7 @@ class EfficientViT(nn.Module):
                 im[patch_idx] = patch
                 #cv2.imwrite("patches/patches_"+str(idx)+"_"+str(patch_idx)+".png", patch)
             x_scaled.append(im)
-        x = torch.tensor(x_scaled).cuda()   
+        x = torch.tensor(x_scaled)
         '''
 
         #x2 = self.features(img)
