@@ -3,6 +3,7 @@ from pathlib import Path
 import html
 import shutil
 import sqlite3
+import textwrap
 
 import pandas as pd
 import streamlit as st
@@ -36,9 +37,9 @@ PREMIUM_CSS = """
     --mint: #E6FFF4;
     --coral: #FFD6D6;
     --cream: #FFF9E6;
-    --ink: #2F2823;
-    --ink-soft: #5C4D45;
-    --muted: #7D6E66;
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-label: #6B7280;
     --gold: #B7781F;
     --gold-strong: #8B5517;
     --line: rgba(255, 255, 255, 0.78);
@@ -51,14 +52,13 @@ PREMIUM_CSS = """
 
 html, body, [data-testid="stAppViewContainer"] {
     min-height: 100%;
-    color: var(--ink);
+    color: var(--text-primary);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
     background:
-        radial-gradient(circle at 12% 14%, rgba(255, 249, 230, 0.96) 0, transparent 28%),
-        radial-gradient(circle at 82% 18%, rgba(230, 223, 255, 0.82) 0, transparent 31%),
-        radial-gradient(circle at 75% 82%, rgba(230, 255, 244, 0.78) 0, transparent 30%),
-        radial-gradient(circle at 18% 82%, rgba(255, 214, 214, 0.58) 0, transparent 25%),
-        linear-gradient(135deg, #FFF9E6 0%, #FFE5D9 32%, #FFD6D6 58%, #DFF4FF 100%);
+        radial-gradient(circle at 12% 14%, rgba(255, 214, 233, 0.30) 0, transparent 30%),
+        radial-gradient(circle at 82% 18%, rgba(230, 223, 255, 0.38) 0, transparent 32%),
+        radial-gradient(circle at 75% 82%, rgba(223, 244, 255, 0.34) 0, transparent 30%),
+        linear-gradient(135deg, #FFE2EE 0%, #E9DDFF 48%, #DDF0FF 100%);
 }
 
 .stApp {
@@ -127,14 +127,14 @@ section[data-testid="stSidebar"] {
 }
 
 [data-testid="stSidebar"] {
-    background: rgba(255, 249, 230, 0.64);
-    border-right: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 20px 0 64px rgba(117, 82, 54, 0.16);
+    background: rgba(255, 255, 255, 0.52);
+    border-right: 1px solid rgba(255, 255, 255, 0.68);
+    box-shadow: 20px 0 64px rgba(31, 41, 55, 0.10);
     backdrop-filter: blur(16px);
 }
 
 [data-testid="stSidebar"] * {
-    color: var(--ink) !important;
+    color: var(--text-primary) !important;
 }
 
 [data-testid="stSidebar"] [role="radiogroup"] label {
@@ -142,21 +142,22 @@ section[data-testid="stSidebar"] {
     border-radius: 18px;
     padding: 0.58rem 0.78rem 0.58rem 1rem;
     margin: 0.2rem 0;
-    color: var(--ink) !important;
+    color: var(--text-primary) !important;
     font-weight: 700;
     transition: all 0.32s ease;
 }
 
 [data-testid="stSidebar"] [role="radiogroup"] label:hover {
-    background: linear-gradient(135deg, rgba(255, 229, 217, 0.92), rgba(230, 223, 255, 0.66));
-    box-shadow: 0 16px 34px rgba(183, 120, 31, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.92);
-    transform: translateX(4px);
+    background: linear-gradient(135deg, rgba(255, 214, 233, 0.70), rgba(230, 223, 255, 0.52));
+    box-shadow: 0 14px 30px rgba(124, 58, 237, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    transform: translateX(5px) scale(1.01);
 }
 
 [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
-    background: linear-gradient(135deg, #FFE5D9, #FFF9E6 52%, #DFF4FF);
-    border: 1px solid rgba(183, 120, 31, 0.28);
-    box-shadow: 0 18px 42px rgba(183, 120, 31, 0.18), 0 0 0 4px rgba(255, 229, 217, 0.55);
+    background: linear-gradient(135deg, #FFE2EE, #EBDFFF 52%, #DDF0FF);
+    border: 1px solid rgba(124, 58, 237, 0.24);
+    box-shadow: 0 16px 36px rgba(124, 58, 237, 0.16), 0 0 0 4px rgba(255, 214, 233, 0.44);
+    font-weight: 800;
 }
 
 [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked)::before {
@@ -172,7 +173,7 @@ section[data-testid="stSidebar"] {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: var(--ink);
+    color: var(--text-primary);
     font-family: "Poppins", "Inter", sans-serif;
     letter-spacing: 0;
 }
@@ -196,6 +197,22 @@ p, li, span, label, div {
 .orb-two { width: 70px; height: 70px; top: 30%; right: 8%; background: linear-gradient(145deg, rgba(230, 223, 255, 0.66), rgba(223, 244, 255, 0.46)); animation-delay: -3s; }
 .orb-three { width: 56px; height: 56px; bottom: 18%; left: 43%; background: linear-gradient(145deg, rgba(255, 214, 214, 0.72), rgba(255, 249, 230, 0.42)); animation-delay: -6s; }
 .orb-four { width: 44px; height: 44px; bottom: 30%; right: 32%; background: linear-gradient(145deg, rgba(230, 255, 244, 0.72), rgba(255, 255, 255, 0.42)); animation-delay: -8s; }
+
+.float-bubble {
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 999px;
+    filter: blur(1.2px);
+    opacity: 0.34;
+    animation: bubbleDrift 18s ease-in-out infinite;
+}
+
+.bubble-a { width: 96px; height: 96px; left: 8%; top: 70%; background: rgba(255, 214, 233, 0.60); animation-delay: -2s; }
+.bubble-b { width: 68px; height: 68px; left: 44%; top: 78%; background: rgba(230, 223, 255, 0.58); animation-delay: -6s; }
+.bubble-c { width: 82px; height: 82px; right: 16%; top: 62%; background: rgba(223, 244, 255, 0.60); animation-delay: -9s; }
+.bubble-d { width: 52px; height: 52px; right: 26%; top: 35%; background: rgba(255, 234, 207, 0.55); animation-delay: -12s; }
+.bubble-e { width: 44px; height: 44px; left: 22%; top: 28%; background: rgba(255, 255, 255, 0.62); animation-delay: -14s; }
 
 .topbar {
     display: grid;
@@ -226,7 +243,7 @@ p, li, span, label, div {
 }
 
 .brand-title {
-    color: var(--ink);
+    color: var(--text-primary);
     font-size: 1.08rem;
     font-weight: 900;
 }
@@ -236,7 +253,7 @@ p, li, span, label, div {
 .hero-subtitle,
 .result-caption,
 .metric-label {
-    color: var(--muted);
+    color: var(--text-secondary);
 }
 
 .top-search-wrap [data-testid="stTextInput"] {
@@ -247,7 +264,7 @@ p, li, span, label, div {
     min-height: 52px;
     border: 1px solid rgba(255, 255, 255, 0.92);
     border-radius: 999px;
-    color: var(--ink) !important;
+    color: var(--text-primary) !important;
     background: rgba(255, 255, 255, 0.72);
     box-shadow: var(--shadow), var(--inner);
 }
@@ -268,7 +285,7 @@ p, li, span, label, div {
     width: 38px;
     height: 38px;
     border-radius: 999px;
-    color: var(--ink);
+    color: var(--text-primary);
     background: rgba(255, 255, 255, 0.72);
     box-shadow: inset 4px 4px 12px rgba(117, 82, 54, 0.08), inset -5px -5px 12px rgba(255, 255, 255, 0.88);
 }
@@ -313,7 +330,7 @@ p, li, span, label, div {
     position: relative;
     z-index: 1;
     margin: 0;
-    color: var(--ink);
+    color: var(--text-primary);
     font-size: 2.85rem;
     font-weight: 900;
     line-height: 1.03;
@@ -336,6 +353,22 @@ p, li, span, label, div {
     transition: transform 0.34s ease, box-shadow 0.34s ease, border-color 0.34s ease, background 0.34s ease;
 }
 
+.chart-card {
+    margin-bottom: 20px;
+}
+
+.chart-title {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+}
+
+.chart-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
+}
+
 .glass-card:hover,
 .metric-card:hover,
 .soft-card:hover,
@@ -349,7 +382,7 @@ p, li, span, label, div {
 
 .section-title {
     margin: 0 0 0.36rem;
-    color: var(--ink);
+    color: var(--text-primary);
     font-family: "Poppins", "Inter", sans-serif;
     font-size: 1.28rem;
     font-weight: 850;
@@ -413,11 +446,11 @@ p, li, span, label, div {
 .metric-label {
     font-size: 0.78rem;
     font-weight: 800;
-    color: var(--ink-soft);
+    color: var(--text-label);
 }
 
 .metric-value {
-    color: var(--ink);
+    color: var(--text-primary);
     font-size: 2rem;
     font-weight: 950;
 }
@@ -457,7 +490,7 @@ p, li, span, label, div {
     position: relative;
     z-index: 1;
     margin-top: 0.46rem;
-    color: var(--ink-soft);
+    color: var(--text-secondary);
 }
 
 .status-pill {
@@ -476,46 +509,52 @@ p, li, span, label, div {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
 }
 
+.insight-list {
+    margin: 0.45rem 0 0;
+    padding-left: 1.05rem;
+    color: var(--text-secondary);
+}
+
+.insight-list li {
+    margin-bottom: 0.32rem;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+}
+
 .auth-score {
     margin-top: 1rem;
     padding: 1rem;
     border-radius: 24px;
     background: linear-gradient(135deg, rgba(230, 255, 244, 0.80), rgba(255, 255, 255, 0.58));
     border: 1px solid rgba(255, 255, 255, 0.88);
-    color: var(--ink);
+    color: var(--text-primary);
     font-weight: 850;
     box-shadow: var(--shadow), var(--inner);
 }
 
 .login-shell {
-    min-height: calc(100vh - 3rem);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 0 1rem;
 }
 
 .login-card {
     position: relative;
     width: min(460px, 94vw);
     margin: 0 auto;
-    border-radius: 34px;
+    border-radius: 20px;
     padding: 1.55rem 1.8rem;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.86);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
-    box-shadow: 0 34px 96px rgba(117, 82, 54, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(20px);
 }
 
 .login-card::before {
-    content: "";
-    position: absolute;
-    inset: -38px;
-    z-index: -1;
-    border-radius: 999px;
-    border: 2px solid rgba(255, 255, 255, 0.46);
-    box-shadow: 0 0 55px rgba(255, 249, 230, 0.96), inset 0 0 45px rgba(223, 244, 255, 0.64);
+    content: none;
 }
 
 .login-card div[data-testid="stTextInput"],
@@ -544,7 +583,7 @@ p, li, span, label, div {
 
 .login-title {
     margin: 0;
-    color: var(--ink);
+    color: var(--text-primary);
     font-family: "Poppins", "Inter", sans-serif;
     font-size: 1.55rem;
     font-weight: 900;
@@ -553,7 +592,7 @@ p, li, span, label, div {
 
 .login-subtitle {
     margin: 0.42rem 0 1.08rem;
-    color: var(--ink-soft);
+    color: var(--text-secondary);
     text-align: center;
 }
 
@@ -570,7 +609,7 @@ p, li, span, label, div {
 .login-badge {
     border-radius: 999px;
     padding: 0.55rem 0.65rem;
-    color: var(--ink-soft);
+    color: var(--text-secondary);
     font-size: 0.8rem;
     font-weight: 750;
     background: rgba(255, 255, 255, 0.66);
@@ -582,31 +621,32 @@ p, li, span, label, div {
     max-width: 430px;
     margin-left: auto;
     margin-right: auto;
-    border: 1px solid rgba(255, 255, 255, 0.86);
-    border-radius: 34px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
     padding: 1.45rem 1.55rem;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42));
-    box-shadow: 0 34px 96px rgba(117, 82, 54, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.20);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(18px);
 }
 
 div[data-testid="stTextInput"] input,
 div[data-testid="stTextInput"] input:focus {
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.94);
-    background: rgba(255, 255, 255, 0.74);
-    color: var(--ink) !important;
-    box-shadow: inset 7px 7px 16px rgba(117, 82, 54, 0.08), inset -8px -8px 18px rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    background: rgba(255, 255, 255, 0.78);
+    color: var(--text-primary) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.42), inset 0 3px 12px rgba(255,255,255,0.30), 0 8px 20px rgba(31, 41, 55, 0.10);
     transition: all 0.32s ease;
 }
 
 div[data-testid="stTextInput"] input::placeholder {
-    color: rgba(92, 77, 69, 0.72);
+    color: #6B7280;
 }
 
 div[data-testid="stTextInput"] input:focus {
-    border-color: rgba(255, 181, 111, 0.98);
-    box-shadow: 0 0 0 4px rgba(255, 229, 217, 0.78), inset 6px 6px 14px rgba(117, 82, 54, 0.06), inset -8px -8px 18px rgba(255, 255, 255, 0.92);
+    border-color: rgba(230, 223, 255, 0.95);
+    box-shadow: 0 0 0 4px rgba(230, 223, 255, 0.52), inset 0 3px 12px rgba(255,255,255,0.45), 0 10px 24px rgba(31, 41, 55, 0.12);
+    outline: none;
 }
 
 div[data-testid="stFileUploader"] section {
@@ -626,57 +666,73 @@ div[data-testid="stFileUploader"] section:hover {
 
 div[data-testid="stFileUploader"] button,
 div[data-testid="stFileUploader"] button:hover {
-    border: 1px solid rgba(141, 83, 20, 0.14) !important;
+    border: 1px solid rgba(79, 70, 229, 0.18) !important;
     border-radius: 999px !important;
-    color: #3C2813 !important;
-    background: linear-gradient(135deg, #FFE5D9 0%, #FFC56F 100%) !important;
-    box-shadow: 0 12px 30px rgba(183, 120, 31, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
+    color: #1F2937 !important;
+    font-weight: 800 !important;
+    padding: 0.72rem 1.1rem !important;
+    background: linear-gradient(135deg, #FFE2EE 0%, #FFDCCB 50%, #E9DDFF 100%) !important;
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
 }
 
 div[data-testid="stFileUploader"] small,
 div[data-testid="stFileUploader"] span,
 div[data-testid="stFileUploader"] p {
-    color: var(--ink-soft) !important;
+    color: #374151 !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
 }
 
 .stButton > button,
 [data-testid="stDownloadButton"] button,
 [data-testid="stFormSubmitButton"] button {
-    border: 1px solid rgba(141, 83, 20, 0.14) !important;
+    border: 1px solid rgba(79, 70, 229, 0.16) !important;
     border-radius: 999px !important;
     padding: 0.78rem 1.15rem !important;
-    color: #3C2813 !important;
+    color: #1F2937 !important;
     font-weight: 900 !important;
-    background: linear-gradient(135deg, #FFD6D6 0%, #FFE5D9 36%, #FFC56F 100%) !important;
-    box-shadow: 0 18px 44px rgba(183, 120, 31, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
+    background: linear-gradient(135deg, #FFD9EA 0%, #FFDCCB 48%, #E9DDFF 100%) !important;
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
     transition: transform 0.30s ease, box-shadow 0.30s ease, filter 0.30s ease, background 0.30s ease !important;
 }
 
 .stButton > button:hover,
 [data-testid="stDownloadButton"] button:hover,
 [data-testid="stFormSubmitButton"] button:hover {
-    color: #2B1B0E !important;
-    background: linear-gradient(135deg, #FFC56F 0%, #FFD6D6 52%, #E6DFFF 100%) !important;
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 24px 58px rgba(183, 120, 31, 0.34), 0 0 32px rgba(255, 197, 111, 0.54), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    color: #111827 !important;
+    background: linear-gradient(135deg, #FFD9EA 0%, #FFCFC2 48%, #DDD1FF 100%) !important;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 24px 52px rgba(79, 70, 229, 0.28), 0 0 28px rgba(221, 209, 255, 0.65), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
 .stButton > button *,
 [data-testid="stDownloadButton"] button *,
 [data-testid="stFormSubmitButton"] button *,
 div[data-testid="stFileUploader"] button * {
-    color: #3C2813 !important;
+    color: #1F2937 !important;
     font-weight: 900 !important;
 }
 
 [data-testid="stCheckbox"] label,
 [data-testid="stCheckbox"] label * {
-    color: var(--ink-soft) !important;
+    color: var(--text-secondary) !important;
+}
+
+label, [data-testid="stWidgetLabel"], [data-testid="stMarkdownContainer"] p, small, .caption {
+    color: var(--text-label) !important;
+}
+
+[data-testid="stHorizontalBlock"] {
+    gap: 20px;
+}
+
+[data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
+    margin-bottom: 20px;
 }
 
 [data-testid="stTabs"] button {
     border-radius: 999px;
-    color: var(--ink) !important;
+    color: var(--text-primary) !important;
 }
 
 [data-testid="stDataFrame"] {
@@ -696,7 +752,7 @@ div[data-testid="stVideo"] video {
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 20px;
 }
 
 .feature-card {
@@ -718,7 +774,7 @@ div[data-testid="stVideo"] video {
 }
 
 .upload-title {
-    color: var(--ink);
+    color: var(--text-primary);
     font-family: "Poppins", "Inter", sans-serif;
     font-size: 1.12rem;
     font-weight: 850;
@@ -726,8 +782,8 @@ div[data-testid="stVideo"] video {
 }
 
 .format-note {
-    color: var(--muted);
-    font-size: 0.86rem;
+    color: #374151;
+    font-size: 0.95rem;
     font-weight: 650;
     margin: 0.55rem 0 0.4rem;
     text-align: center;
@@ -749,7 +805,7 @@ div[data-testid="stVideo"] video {
 }
 
 .detail-label {
-    color: var(--muted);
+    color: var(--text-label);
     font-size: 0.72rem;
     font-weight: 850;
     letter-spacing: 0.06em;
@@ -757,7 +813,7 @@ div[data-testid="stVideo"] video {
 }
 
 .detail-value {
-    color: var(--ink);
+    color: var(--text-primary);
     font-size: 0.95rem;
     font-weight: 850;
     margin-top: 0.28rem;
@@ -776,6 +832,12 @@ div[data-testid="stVideo"] video {
 @keyframes floatSlow {
     0%, 100% { transform: translate3d(0, 0, 0); }
     50% { transform: translate3d(-18px, 16px, 0); }
+}
+
+@keyframes bubbleDrift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    30% { transform: translate3d(10px, -24px, 0) scale(1.05); }
+    60% { transform: translate3d(-9px, -40px, 0) scale(0.98); }
 }
 
 @media (max-width: 980px) {
@@ -809,6 +871,11 @@ st.markdown(
     <div class="ambient-orb orb-two"></div>
     <div class="ambient-orb orb-three"></div>
     <div class="ambient-orb orb-four"></div>
+    <div class="float-bubble bubble-a"></div>
+    <div class="float-bubble bubble-b"></div>
+    <div class="float-bubble bubble-c"></div>
+    <div class="float-bubble bubble-d"></div>
+    <div class="float-bubble bubble-e"></div>
     """,
     unsafe_allow_html=True,
 )
@@ -854,40 +921,49 @@ def login_view() -> None:
     st.markdown(
         """
         <style>
+        html, body {
+            overflow: hidden;
+        }
         .block-container {
+            height: 100vh;
             min-height: 100vh;
-            padding-top: clamp(1rem, 7vh, 4.5rem);
-            padding-bottom: 1rem;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.85rem;
+            max-width: 560px;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown(
-        """
-        <div class="login-shield">TG</div>
-        <h1 class="login-title">TRUTHGUARD</h1>
-        <p class="login-subtitle"><strong>AI Deepfake Detection Platform</strong><br>Welcome Back</p>
-        """,
-        unsafe_allow_html=True,
-    )
     with st.form("premium_login_form"):
+        st.markdown(
+            """
+            <div class="login-shield">TG</div>
+            <h1 class="login-title">TRUTHGUARD</h1>
+            <p class="login-subtitle"><strong>AI Deepfake Detection Platform</strong><br>Welcome Back</p>
+            """,
+            unsafe_allow_html=True,
+        )
         username = st.text_input("Username / Email", placeholder="admin, celebrity, or analyst")
         password = st.text_input("Password", type="password", placeholder="123")
         remember = st.checkbox("Remember me")
         submitted = st.form_submit_button("Sign In", width="stretch")
-
-    st.markdown(
-        """
-        <div class="login-badges">
-            <div class="login-badge">AI Powered</div>
-            <div class="login-badge">Secure</div>
-            <div class="login-badge">Reliable</div>
-        </div>
-        <p class="login-subtitle" style="font-size: 0.82rem; margin-top: 1rem;">Demo users: admin / 123, celebrity / 123, analyst / 123</p>
-        """,
-        unsafe_allow_html=True,
-    )
+        st.markdown(
+            """
+            <div class="login-badges">
+                <div class="login-badge">AI Powered</div>
+                <div class="login-badge">Secure</div>
+                <div class="login-badge">Reliable</div>
+            </div>
+            <p class="login-subtitle" style="font-size: 0.86rem; margin-top: 0.4rem;">Demo users: admin / 123, celebrity / 123, analyst / 123</p>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if submitted:
         authenticated_user = authenticate(username, password)
@@ -995,13 +1071,15 @@ def metric_cards(total: int, real_count: int, fake_count: int, avg_conf: float) 
     ]
     html_cards = ""
     for label, value, icon, glow in cards:
-        html_cards += f"""
-        <div class="metric-card" style="--card-glow: {glow};">
-            <div class="metric-icon">{escape(icon)}</div>
-            <div class="metric-label">{escape(label)}</div>
-            <div class="metric-value">{escape(value)}</div>
-        </div>
-        """
+        html_cards += textwrap.dedent(
+            f"""
+            <div class="metric-card" style="--card-glow: {glow};">
+                <div class="metric-icon">{escape(icon)}</div>
+                <div class="metric-label">{escape(label)}</div>
+                <div class="metric-value">{escape(value)}</div>
+            </div>
+            """
+        ).strip()
     st.markdown(f'<div class="metric-grid">{html_cards}</div>', unsafe_allow_html=True)
 
 
@@ -1040,12 +1118,14 @@ def show_result(result: dict, technical: bool = False) -> None:
         if "frames_analyzed" in result:
             details["Frames"] = result["frames_analyzed"]
         items = "".join(
-            f"""
-            <div class="detail-item">
-                <div class="detail-label">{escape(key)}</div>
-                <div class="detail-value">{escape(value)}</div>
-            </div>
-            """
+            textwrap.dedent(
+                f"""
+                <div class="detail-item">
+                    <div class="detail-label">{escape(key)}</div>
+                    <div class="detail-value">{escape(value)}</div>
+                </div>
+                """
+            ).strip()
             for key, value in details.items()
         )
         st.markdown(f'<div class="detail-grid">{items}</div>', unsafe_allow_html=True)
@@ -1064,7 +1144,7 @@ def run_image_detector(technical: bool = False, key_suffix: str = "") -> None:
         label_visibility="collapsed",
     )
     run_scan = st.button("Run Image Scan", width="stretch", key=f"image_button_{key_suffix}")
-    st.markdown('<div class="format-note">JPG and PNG supported</div>', unsafe_allow_html=True)
+    st.markdown('<div class="format-note">200MB per file • JPG, JPEG, PNG</div>', unsafe_allow_html=True)
     if run_scan:
         if not uploaded:
             st.warning("Please upload an image before running the scan.")
@@ -1129,6 +1209,12 @@ def dashboard(title: str) -> None:
     metric_cards(total, real_count, fake_count, avg_conf)
 
     left, right = st.columns([1.45, 1])
+    dominant = "Balanced"
+    if fake_count > real_count:
+        dominant = "High fake-risk uploads"
+    elif real_count > fake_count:
+        dominant = "Mostly authentic uploads"
+
     with left:
         card_header("Detection Overview", "Pastel-coded verification records from the unified platform.")
         if df.empty:
@@ -1137,7 +1223,8 @@ def dashboard(title: str) -> None:
             st.dataframe(df[["username", "detector_type", "source_file", "predicted_label", "confidence", "processing_seconds", "created_at"]], width="stretch")
     with right:
         st.markdown(
-            """
+            textwrap.dedent(
+                f"""
             <div class="glass-card">
                 <div class="section-title">Recent Activity</div>
                 <p class="section-copy">Image analyzed</p>
@@ -1145,7 +1232,17 @@ def dashboard(title: str) -> None:
                 <p class="section-copy">Report uploaded</p>
                 <p class="section-copy">User profile active</p>
             </div>
-            """,
+            <div class="glass-card" style="margin-top: 20px;">
+                <div class="section-title">Smart Insights</div>
+                <p class="section-copy">Live guidance based on current detections.</p>
+                <ul class="insight-list">
+                    <li>Current trend: <strong>{escape(dominant)}</strong></li>
+                    <li>Total media scanned: <strong>{escape(total)}</strong></li>
+                    <li>Average confidence: <strong>{escape(f"{avg_conf:.1f}%")}</strong></li>
+                </ul>
+            </div>
+            """
+            ).strip(),
             unsafe_allow_html=True,
         )
 
@@ -1168,18 +1265,22 @@ def analytics_view() -> None:
 
     col1, col2 = st.columns(2)
     with col1:
-        card_header("Real vs Fake Distribution", "Pie chart of prediction labels.")
+        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="chart-title">Real vs Fake Distribution</div><div class="chart-subtitle">Pie chart of prediction labels.</div>',
+            unsafe_allow_html=True,
+        )
         pie_df = pd.DataFrame({"label": ["Real", "Fake"], "count": [real_count, fake_count]})
         st.vega_lite_chart(
             pie_df,
             {
-                "mark": {"type": "arc", "innerRadius": 55, "stroke": "#fff9e6", "strokeWidth": 2},
+                "mark": {"type": "arc", "innerRadius": 55, "stroke": "#F8FAFC", "strokeWidth": 2},
                 "encoding": {
                     "theta": {"field": "count", "type": "quantitative"},
                     "color": {
                         "field": "label",
                         "type": "nominal",
-                        "scale": {"domain": ["Real", "Fake"], "range": ["#8DD7A8", "#FF9E9E"]},
+                        "scale": {"domain": ["Real", "Fake"], "range": ["#A7F3D0", "#F9A8D4"]},
                     },
                     "tooltip": [{"field": "label"}, {"field": "count"}],
                 },
@@ -1187,20 +1288,36 @@ def analytics_view() -> None:
             },
             width="stretch",
         )
+        st.markdown("</div>", unsafe_allow_html=True)
     with col2:
-        card_header("Detections by Type", "Image and video upload analysis count.")
+        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="chart-title">Detections by Type</div><div class="chart-subtitle">Image and video upload analysis count.</div>',
+            unsafe_allow_html=True,
+        )
         type_df = df["detector_type"].value_counts().rename_axis("type").reset_index(name="count")
-        st.bar_chart(type_df, x="type", y="count", color="#B9DFFF")
+        st.bar_chart(type_df, x="type", y="count", color="#93C5FD")
+        st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown('<div style="height: 20px;"></div>', unsafe_allow_html=True)
     col3, col4 = st.columns(2)
     with col3:
-        card_header("Detection Trend Over Time", "Daily detection activity.")
+        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="chart-title">Detection Trend Over Time</div><div class="chart-subtitle">Daily detection activity.</div>',
+            unsafe_allow_html=True,
+        )
         trend = df.copy()
         trend["date"] = pd.to_datetime(trend["created_at"], errors="coerce").dt.date
         trend_df = trend.groupby("date").size().reset_index(name="detections")
-        st.line_chart(trend_df, x="date", y="detections", color="#D8B4FE")
+        st.line_chart(trend_df, x="date", y="detections", color="#C4B5FD")
+        st.markdown("</div>", unsafe_allow_html=True)
     with col4:
-        card_header("Model Snapshot", "Presentation-ready quality indicators.")
+        st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="chart-title">Model Snapshot</div><div class="chart-subtitle">Presentation-ready quality indicators.</div>',
+            unsafe_allow_html=True,
+        )
         snapshot = pd.DataFrame(
             {
                 "metric": ["Total uploads", "Fake percentage", "Accuracy"],
@@ -1208,6 +1325,7 @@ def analytics_view() -> None:
             }
         )
         st.dataframe(snapshot, width="stretch", hide_index=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def history_view(query: str = "") -> None:
@@ -1250,13 +1368,15 @@ def features_view() -> None:
     ]
     cards = ""
     for index, (title, body) in enumerate(features, start=1):
-        cards += f"""
-        <div class="feature-card">
-            <div class="feature-icon">{index}</div>
-            <div class="section-title">{escape(title)}</div>
-            <p class="section-copy">{escape(body)}</p>
-        </div>
-        """
+        cards += textwrap.dedent(
+            f"""
+            <div class="feature-card">
+                <div class="feature-icon">{index}</div>
+                <div class="section-title">{escape(title)}</div>
+                <p class="section-copy">{escape(body)}</p>
+            </div>
+            """
+        ).strip()
     st.markdown(f'<div class="feature-grid">{cards}</div>', unsafe_allow_html=True)
 
 
